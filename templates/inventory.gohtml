@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h1>Login Page</h1>
+{{range .}}
+    <!-- {{.MarketHashName}}<img src="http://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposem2LFZf2-r3dThR6c6iq4yCkP_gfe_Uwz4HuZ0p3u-Q9oiijgyw_UpqZjv6d4GcewdoaVGB_VG8k-nt15Ki_MOekXjyVoE/96fx96f"><br>-->
+    {{.MarketHashName}}<img src="http://steamcommunity-a.akamaihd.net/economy/image/{{.IconURL}}"style="width:300;height:300"><br>
+{{end}}
+</body>
+</html>
