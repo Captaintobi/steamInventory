@@ -6,10 +6,12 @@ import (
 	"html/template"
 	"net/http"
 
+	"io/ioutil"
+
 	"github.com/solovev/steam_go"
 )
 
-type user struct {
+type User struct {
 	Username string
 	Password string
 	Steamid  string
@@ -31,6 +33,7 @@ func main() {
 	http.HandleFunc("/signup", signUpPage)
 	http.HandleFunc("/login", loginPage)
 	http.HandleFunc("/invi", getInventory)
+	http.HandleFunc("/price", myPrice)
 	http.Handle("/favicon.io", http.NotFoundHandler())
 
 	http.ListenAndServe(":8080", nil)
@@ -57,19 +60,39 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	tpl.ExecuteTemplate(w, "index.gohtml", "HElla")
 
 }
-func getInventory(w http.ResponseWriter, r *http.Request) {
-	resp, err := http.Get("http://steamcommunity.com/inventory/76561198035405427/730/2?l=english&count=5000")
+func myPrice(w http.ResponseWriter, r *http.Request) {
+	resp, err := http.Get("http://steamcommunity.com/market/priceoverview/?currency=1&appid=730&market_hash_name=Chroma%203%20Case")
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer resp.Body.Close()
+	content, _ := ioutil.ReadAll(resp.Body)
+	w.Write(content)
 
-	var inventory Inventory
-	json.NewDecoder(resp.Body).Decode(&inventory)
-	for _, itemName := range inventory.Descriptions {
-		fmt.Println(itemName.MarketHashName)
+	var price Price
+	json.NewDecoder(resp.Body).Decode(&price)
+	tpl.ExecuteTemplate(w, "price.gohtml", price.LowestPrice)
+}
+func getInventory(w http.ResponseWriter, r *http.Request) {
+	if steamID == "" {
+		w.Write([]byte("You have to sign in first"))
+	} else {
+		//TODO: move to another folder
+		resp, err := http.Get("http://steamcommunity.com/inventory/" + steamID + "/730/2?l=english&count=5000")
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer resp.Body.Close()
+
+		var inventory Inventory
+		json.NewDecoder(resp.Body).Decode(&inventory)
+		for _, itemName := range inventory.Descriptions {
+			myPrice, _ := getPrice(730, itemName.MarketHashName)
+			fmt.Println(itemName, myPrice.LowestPrice)
+		}
+
+		tpl.ExecuteTemplate(w, "inventory.gohtml", inventory.Descriptions)
 	}
-	tpl.ExecuteTemplate(w, "inventory.gohtml", inventory.Descriptions)
 }
 
 func signUpPage(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +106,7 @@ func signUpPage(w http.ResponseWriter, r *http.Request) {
 	//TODO: Move to another file
 	username := r.FormValue("username")
 	password := r.FormValue("password")
-	user := user{
+	user := User{
 		username,
 		password,
 		steamID,
