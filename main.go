@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-
-	"io/ioutil"
+	"net/url"
 
 	"github.com/solovev/steam_go"
 )
@@ -61,16 +60,32 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 }
 func myPrice(w http.ResponseWriter, r *http.Request) {
-	resp, err := http.Get("http://steamcommunity.com/market/priceoverview/?currency=1&appid=730&market_hash_name=Chroma%203%20Case")
+	appid := "730"
+	marketname := "AK-47 | Aquamarine Revenge (Minimal Wear)"
+	base, err := url.Parse("http://steamcommunity.com/market/priceoverview/?")
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer resp.Body.Close()
-	content, _ := ioutil.ReadAll(resp.Body)
-	w.Write(content)
+	v := url.Values{}
+	v.Set("appid", appid)
+	v.Add("currency", string(1))
+	v.Add("market_hash_name", marketname)
+	base.RawQuery = v.Encode()
+	//resp, err := http.Get("http://steamcommunity.com/market/priceoverview/?appid=730&currency=1&market_hash_name=StatTrak%E2%84%A2%20M4A1-S%20|%20Hyper%20Beast%20(Minimal%20Wear)")
+	resp, err := http.Get(base.String())
+	if err != nil {
+		fmt.Println(err)
 
-	var price Price
-	json.NewDecoder(resp.Body).Decode(&price)
+	}
+	defer resp.Body.Close()
+	var price Marketprice
+
+	fmt.Println(price.LowestPrice)
+	newPrice, err := getPrice(730, "AK-47 | Aquamarine Revenge (Minimal Wear)")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("New", newPrice.LowestPrice)
 	tpl.ExecuteTemplate(w, "price.gohtml", price.LowestPrice)
 }
 func getInventory(w http.ResponseWriter, r *http.Request) {
