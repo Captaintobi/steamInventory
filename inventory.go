@@ -4,9 +4,6 @@ import (
 	newApi "github.com/Philipp15b/go-steamapi"
 )
 
-type MyInventory struct {
-	Result Inventory
-}
 type Inventory struct {
 	Assets []struct {
 		Appid      string `json:"appid"`

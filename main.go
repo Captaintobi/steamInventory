@@ -1,11 +1,13 @@
 package main
 
+//TODO: Major flaw in the way i was doing things
+//Come back when i can get market price for multiple items at once.
+//Mainly steam trading cards.
 import (
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
-	"net/url"
 
 	"github.com/solovev/steam_go"
 )
@@ -16,8 +18,6 @@ type User struct {
 	Steamid  string
 	Friends  map[string]uint64
 }
-
-const API_KEY = "CD3D14A8D01B5E68C7384C946B3A6631"
 
 var steamID string
 var isLoggedIn bool
@@ -34,8 +34,7 @@ func main() {
 	http.HandleFunc("/invi", getInventory)
 	http.HandleFunc("/price", myPrice)
 	http.Handle("/favicon.io", http.NotFoundHandler())
-
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":9089", nil)
 }
 func loginPage(w http.ResponseWriter, r *http.Request) {
 	opID := steam_go.NewOpenId(r)
@@ -60,33 +59,12 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 }
 func myPrice(w http.ResponseWriter, r *http.Request) {
-	appid := "730"
-	marketname := "AK-47 | Aquamarine Revenge (Minimal Wear)"
-	base, err := url.Parse("http://steamcommunity.com/market/priceoverview/?")
-	if err != nil {
-		fmt.Println(err)
-	}
-	v := url.Values{}
-	v.Set("appid", appid)
-	v.Add("currency", string(1))
-	v.Add("market_hash_name", marketname)
-	base.RawQuery = v.Encode()
-	//resp, err := http.Get("http://steamcommunity.com/market/priceoverview/?appid=730&currency=1&market_hash_name=StatTrak%E2%84%A2%20M4A1-S%20|%20Hyper%20Beast%20(Minimal%20Wear)")
-	resp, err := http.Get(base.String())
-	if err != nil {
-		fmt.Println(err)
-
-	}
-	defer resp.Body.Close()
-	var price Marketprice
-
-	fmt.Println(price.LowestPrice)
 	newPrice, err := getPrice(730, "AK-47 | Aquamarine Revenge (Minimal Wear)")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("New", newPrice.LowestPrice)
-	tpl.ExecuteTemplate(w, "price.gohtml", price.LowestPrice)
+	tpl.ExecuteTemplate(w, "price.gohtml", newPrice)
 }
 func getInventory(w http.ResponseWriter, r *http.Request) {
 	if steamID == "" {
@@ -102,9 +80,14 @@ func getInventory(w http.ResponseWriter, r *http.Request) {
 		var inventory Inventory
 		json.NewDecoder(resp.Body).Decode(&inventory)
 		for _, itemName := range inventory.Descriptions {
-			myPrice, _ := getPrice(730, itemName.MarketHashName)
-			fmt.Println(itemName, myPrice.LowestPrice)
+			fmt.Println(itemName.MarketHashName)
 		}
+		myPrice, err := getPrice(730, "R8 Revolver | Bone Mask (Field-Tested)")
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(myPrice.LowestPrice)
+		fmt.Println()
 
 		tpl.ExecuteTemplate(w, "inventory.gohtml", inventory.Descriptions)
 	}
