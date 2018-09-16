@@ -1,12 +1,8 @@
 package main
 
-import (
-	newApi "github.com/Philipp15b/go-steamapi"
-)
-
 type Inventory struct {
 	Assets []struct {
-		Appid      string `json:"appid"`
+		Appid      int    `json:"appid"`
 		Contextid  string `json:"contextid"`
 		Assetid    string `json:"assetid"`
 		Classid    string `json:"classid"`
@@ -20,29 +16,20 @@ type Inventory struct {
 		Currency        int    `json:"currency"`
 		BackgroundColor string `json:"background_color"`
 		IconURL         string `json:"icon_url"`
-		IconURLLarge    string `json:"icon_url_large,omitempty"`
 		Descriptions    []struct {
 			Type  string `json:"type"`
 			Value string `json:"value"`
 			Color string `json:"color,omitempty"`
 		} `json:"descriptions"`
-		Tradable int `json:"tradable"`
-		Actions  []struct {
-			Link string `json:"link"`
-			Name string `json:"name"`
-		} `json:"actions,omitempty"`
-		Name           string `json:"name"`
-		NameColor      string `json:"name_color"`
-		Type           string `json:"type"`
-		MarketName     string `json:"market_name"`
-		MarketHashName string `json:"market_hash_name"`
-		MarketActions  []struct {
-			Link string `json:"link"`
-			Name string `json:"name"`
-		} `json:"market_actions,omitempty"`
-		Commodity                 int `json:"commodity"`
-		MarketTradableRestriction int `json:"market_tradable_restriction"`
-		Marketable                int `json:"marketable"`
+		Tradable                  int    `json:"tradable"`
+		Name                      string `json:"name"`
+		NameColor                 string `json:"name_color"`
+		Type                      string `json:"type"`
+		MarketName                string `json:"market_name"`
+		MarketHashName            string `json:"market_hash_name"`
+		Commodity                 int    `json:"commodity"`
+		MarketTradableRestriction int    `json:"market_tradable_restriction"`
+		Marketable                int    `json:"marketable"`
 		Tags                      []struct {
 			Category              string `json:"category"`
 			InternalName          string `json:"internal_name"`
@@ -50,12 +37,22 @@ type Inventory struct {
 			LocalizedTagName      string `json:"localized_tag_name"`
 			Color                 string `json:"color,omitempty"`
 		} `json:"tags"`
+		IconURLLarge string `json:"icon_url_large,omitempty"`
+		Actions      []struct {
+			Link string `json:"link"`
+			Name string `json:"name"`
+		} `json:"actions,omitempty"`
+		MarketActions []struct {
+			Link string `json:"link"`
+			Name string `json:"name"`
+		} `json:"market_actions,omitempty"`
 	} `json:"descriptions"`
 	TotalInventoryCount int `json:"total_inventory_count"`
 	Success             int `json:"success"`
 	Rwgrsn              int `json:"rwgrsn"`
 }
 
+/*
 func friendToMap(id uint64, filter newApi.Relationship, apiKey string) (map[string]uint64, error) {
 	friendList, err := newApi.GetFriendsList(id, filter, apiKey)
 	if err != nil {
@@ -96,3 +93,4 @@ func friendToMap(id uint64, filter newApi.Relationship, apiKey string) (map[stri
 	return myFriends, nil
 
 }
+*/

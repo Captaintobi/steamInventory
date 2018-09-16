@@ -7,7 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/solovev/steam_go"
 )
@@ -75,10 +77,10 @@ func getInventory(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
 
 		var inventory Inventory
-		json.NewDecoder(resp.Body).Decode(&inventory)
+		json.NewDecoder(strings.NewReader(string(body))).Decode(&inventory)
 		for _, itemName := range inventory.Descriptions {
 			fmt.Println(itemName.MarketHashName)
 		}
